@@ -1,19 +1,13 @@
 import time
 from flask import Flask, render_template
-from celery import Celery
+from celery_utils import get_celery_app_instance
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 
-# celery config
-app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
-app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
-
-celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
-celery.conf.broker_url = app.config['CELERY_BROKER_URL']
-celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
-
+# celery app instance
+celery = get_celery_app_instance(app)
 
 @app.route("/")
 def hello_world():
@@ -34,3 +28,18 @@ def long_running_task():
     time.sleep(time_to_wait)
     
     return f"<p>The task completed in {time_to_wait} seconds!"
+
+# celery tasks
+@celery.task
+def sending_email_with_celery():
+    print("Executing Long running task : Sending email with celery...")
+    time.sleep(15)
+    print("Task complete!")
+
+
+# route to trigger celery task
+@app.route("/long_running_task_celery")
+def long_running_task_celery():
+    sending_email_with_celery.delay()
+    return f"Long running task trigged with Celery! Check terminal to see the logs..."
+    
