@@ -1,9 +1,19 @@
 import time
 from flask import Flask, render_template
+from celery import Celery
 
 app = Flask(__name__)
 app.jinja_env.auto_reload = True
 app.config["TEMPLATES_AUTO_RELOAD"] = True
+
+# celery config
+app.config['CELERY_BROKER_URL'] = 'redis://localhost:6379'
+app.config['CELERY_RESULT_BACKEND'] = 'redis://localhost:6379'
+
+celery = Celery(app.name, broker=app.config['CELERY_BROKER_URL'])
+celery.conf.broker_url = app.config['CELERY_BROKER_URL']
+celery.conf.result_backend = app.config['CELERY_RESULT_BACKEND']
+
 
 @app.route("/")
 def hello_world():
