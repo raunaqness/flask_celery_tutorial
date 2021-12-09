@@ -1,5 +1,7 @@
 import time
 from flask import Flask, render_template
+
+# importing function to get celery app instance
 from celery_utils import get_celery_app_instance
 
 app = Flask(__name__)
@@ -36,10 +38,10 @@ def sending_email_with_celery():
     time.sleep(15)
     print("Task complete!")
 
-
 # route to trigger celery task
 @app.route("/long_running_task_celery")
 def long_running_task_celery():
+    # function.delay() is used to trigger function as celery task
     sending_email_with_celery.delay()
     return f"Long running task trigged with Celery! Check terminal to see the logs..."
     

@@ -7,7 +7,7 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379'
 # initialize celery app
 def get_celery_app_instance(app):
     celery = Celery(
-        app.import_name,
+        name=app.import_name,
         backend=CELERY_BROKER_URL,
         broker=CELERY_BROKER_URL
     )
